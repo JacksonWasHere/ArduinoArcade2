@@ -9,8 +9,8 @@ int coins[20][2];
 int enemyMoveWait = 600;
 long int currentMoveWait = 0;
 int frameCount = 0;
-boolean alive = true;
-int time = 0;
+int state = 0;
+int timev = 0;
 
 byte customChar1[8] {
   B10000,
@@ -83,13 +83,15 @@ void loop() {
     }
     reset();
   }
-  if (alive) {
+  if (state==1) {
     if (millis() - currentMoveWait > enemyMoveWait) {
       update();
       currentMoveWait = millis();
       Serial.print(currentMoveWait);
       Serial.print("\n");
     }
+  } else if (state == 0){
+    makeMenu();
   }
   else {
     lcd.clear();
@@ -101,6 +103,10 @@ void loop() {
   delay(10);
 }
 
+void makeMenu(){
+  //TODO: add menu code
+}
+
 void update() {
   lcd.clear();
   //Draw
@@ -109,9 +115,9 @@ void update() {
     drawSprite(enemies[i], false);
   }
 
-  time = (millis() / 2500);
-  lcd.setCursor(16-String(time).length(),0);
-  lcd.print(time/5*5);
+  timev = (millis() / 2500);
+  lcd.setCursor(16-String(timev).length(),0);
+  lcd.print(timev/5*5);
 
   //Move
   int curWait = 0;
@@ -124,8 +130,12 @@ void update() {
       enemies[i][0] = -1;
       enemies[i][1] = -1;
     }
+
+    //Collisions
+    if(enemies[i][0] == player[0] && enemies[i][1]==player[1]){
+      state = 2;
+    }
   }
-  enemyMoveWait-=2;
   //check if it's time to spawn a new enemy
   if (frameCount%4==0) {
     addEnemy();
@@ -142,7 +152,7 @@ void drawSprite(int sprite[], bool plays) {
   lcd.createChar(1, customChar1);
   lcd.createChar(2, customChar2);
 
-  if (sprite[0] >= 0 && sprite[1] >= 0 && sprite[0] < (16 - String(time).length())) {    //continue
+  if (sprite[0] >= 0 && sprite[1] >= 0 && sprite[0] < (16 - String(timev).length())) {    //continue
     lcd.setCursor(sprite[0], sprite[1]);
 
     if (plays) {
@@ -169,8 +179,8 @@ void addEnemy() {
 
 void reset() {
   //if dead then we reset all values and restart the game
-  if (!alive) {
-    alive = true;
+  if (state==2) {
+    state = 1;
     player[0] = 0;
     player[1] = 0;
     //score = 0;
@@ -180,6 +190,6 @@ void reset() {
     }
     currentMoveWait = millis();
     frameCount = 0;
+    timev = 0;
   }
 }
-
