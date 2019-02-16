@@ -95,10 +95,10 @@ void loop() {
   else {
     lcd.clear();
     lcd.setCursor(0, 0);
-    lcd.print("Your Score: ")
+    lcd.print("Your Score: ");
     lcd.setCursor(16-String(timeV).length(), 0);
     lcd.print(timeV/5*5);
-    
+  } 
 }
 
 void update() {
@@ -109,7 +109,7 @@ void update() {
     drawSprite(enemies[i], false);
   }
 
-  time = (millis() / 2500);
+  timeV = (millis() / 2500);
   lcd.setCursor(16-String(timeV).length(),0);
   lcd.print(timeV/5*5);
 
@@ -169,9 +169,27 @@ void addEnemy() {
   }
 }
 
+void makeMenu() {
+  lcd.clear();
+  lcd.setCursor(0,0);
+  lcd.print("Welcome To . . .");
+  lcd.setCursor(0,1);
+  lcd.print("Space Run!");
+  if (digitalRead(dButton) == LOW) {
+    lcd.clear();
+    update();
+  }
+  if (digitalRead(uButton) == LOW){
+    lcd.clear();
+    update();
+  }
+}
+
 void reset() {
   //if dead then we reset all values and restart the game
+  //timeV = 0;
   if (alive==2) {
+    timeV = 0;
     alive = 1;
     player[0] = 0;
     player[1] = 0;
