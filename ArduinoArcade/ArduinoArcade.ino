@@ -91,13 +91,18 @@ void loop() {
     }
   } else if(alive==0){
     makeMenu();
-  }
-  else {
+  }else {
     lcd.clear();
     lcd.setCursor(0, 0);
     lcd.print("Your Score: ");
     lcd.setCursor(16-String(timeV).length(), 0);
     lcd.print(timeV/5*5);
+    if (digitalRead(dButton) == LOW) {
+      reset();
+    }
+    if (digitalRead(uButton) == LOW) {
+      reset();
+    }
   } 
 }
 
@@ -177,17 +182,19 @@ void makeMenu() {
   lcd.print("Space Run!");
   if (digitalRead(dButton) == LOW) {
     lcd.clear();
+    alive = 1;
     update();
   }
   if (digitalRead(uButton) == LOW){
     lcd.clear();
+    alive = 1;
     update();
   }
 }
 
 void reset() {
   //if dead then we reset all values and restart the game
-  //timeV = 0;
+  timeV = 0;
   if (alive==2) {
     timeV = 0;
     alive = 1;
