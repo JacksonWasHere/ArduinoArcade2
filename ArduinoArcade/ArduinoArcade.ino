@@ -7,8 +7,8 @@ int player[] = {
 int enemies[20][2];
 int coins[20][2];
 int enemyMoveWait = 600;
-int currentMoveWait = 0;
-int enemySpawnWait = 2500;
+long int currentMoveWait = 0;
+int frameCount = 0;
 int currentSpawnWait = 0;
 boolean alive = true;
 int distance = 0;
@@ -54,7 +54,7 @@ const int dButton = 12;
 const int uButton = 11;
 //----------------------
 void setup() {
-
+  Serial.begin(9600);
   //initialize enemies
   for (int i = 0; i < 20; i++) {
     enemies[i][0] = -1;
@@ -63,17 +63,15 @@ void setup() {
   //start timing
   currentMoveWait = millis();
   currentSpawnWait = millis();
-  addEnemy();
   //-----------Initialize buttons/LCD-----------
   lcd.begin(16, 2);
   lcd.clear();
-  pinMode(dButton, INPUT);
   pinMode(uButton, INPUT);
+  pinMode(dButton, INPUT);
   //----------------------
 }
 
 void loop() {
-
   if (digitalRead(dButton) == LOW) {
     if (player[1] < 1) {
       player[1]++;
@@ -90,6 +88,8 @@ void loop() {
     if (millis() - currentMoveWait > enemyMoveWait) {
       update();
       currentMoveWait = millis();
+      Serial.print(currentMoveWait);
+      Serial.print("\n");
     }
   }
   else {
@@ -121,12 +121,12 @@ void update() {
       enemies[i][1] = -1;
     }
   }
-  //Check Collisions
   //check if it's time to spawn a new enemy
-  //  if (millis() - currentSpawnWait > enemySpawnWait) {
-  //    addEnemy();
-  //    currentSpawnWait = millis();
-  //  }
+  if (frameCount%4==0) {
+    addEnemy();
+    currentSpawnWait = millis();
+  }
+  frameCount++;
 }
 
 
@@ -184,6 +184,6 @@ void reset() {
       enemies[i][1] = -1;
     }
     currentMoveWait = millis();
-    currentSpawnWait = millis();
+    frameCount = 0;
   }
 }
