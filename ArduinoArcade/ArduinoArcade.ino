@@ -9,7 +9,7 @@ int coins[20][2];
 int enemyMoveWait = 600;
 long int currentMoveWait = 0;
 int frameCount = 0;
-boolean alive = true;
+int alive = 0;
 int timeV = 0;
 
 byte customChar1[8] {
@@ -82,13 +82,15 @@ void loop() {
     }
     reset();
   }
-  if (alive) {
+  if (alive==1) {
     if (millis() - currentMoveWait > enemyMoveWait) {
       update();
       currentMoveWait = millis();
       Serial.print(currentMoveWait);
       Serial.print("\n");
     }
+  } else if(alive==0){
+    makeMenu();
   }
   else {
     lcd.clear();
@@ -122,8 +124,10 @@ void update() {
       enemies[i][0] = -1;
       enemies[i][1] = -1;
     }
+    if(enemies[i][0]==player[0] && enemies[i][1]==player[1]){
+      alive = 2;
+    }
   }
-  enemyMoveWait-=2;
   //check if it's time to spawn a new enemy
   if (frameCount%4==0) {
     addEnemy();
@@ -167,8 +171,8 @@ void addEnemy() {
 
 void reset() {
   //if dead then we reset all values and restart the game
-  if (!alive) {
-    alive = true;
+  if (alive==2) {
+    alive = 1;
     player[0] = 0;
     player[1] = 0;
     //score = 0;
@@ -180,4 +184,3 @@ void reset() {
     frameCount = 0;
   }
 }
-
