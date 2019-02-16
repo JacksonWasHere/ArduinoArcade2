@@ -9,10 +9,8 @@ int coins[20][2];
 int enemyMoveWait = 600;
 long int currentMoveWait = 0;
 int frameCount = 0;
-int currentSpawnWait = 0;
 boolean alive = true;
-int distance = 0;
-int score = 0;
+int time = 0;
 
 byte customChar1[8] {
   B10000,
@@ -62,7 +60,6 @@ void setup() {
   }
   //start timing
   currentMoveWait = millis();
-  currentSpawnWait = millis();
   //-----------Initialize buttons/LCD-----------
   lcd.begin(16, 2);
   lcd.clear();
@@ -72,6 +69,8 @@ void setup() {
 }
 
 void loop() {
+
+
   if (digitalRead(dButton) == LOW) {
     if (player[1] < 1) {
       player[1]++;
@@ -109,6 +108,11 @@ void update() {
   for (int i = 0; i < 20; i++) {
     drawSprite(enemies[i], false);
   }
+
+  time = (millis() / 2500);
+  lcd.setCursor(16-String(time).length(),0);
+  lcd.print(time/5*5);
+
   //Move
   int curWait = 0;
   for (int i = 0; i < 20; i++) {
@@ -121,10 +125,10 @@ void update() {
       enemies[i][1] = -1;
     }
   }
+  enemyMoveWait-=2;
   //check if it's time to spawn a new enemy
   if (frameCount%4==0) {
     addEnemy();
-    currentSpawnWait = millis();
   }
   frameCount++;
 }
@@ -138,7 +142,7 @@ void drawSprite(int sprite[], bool plays) {
   lcd.createChar(1, customChar1);
   lcd.createChar(2, customChar2);
 
-  if (sprite[0] >= 0 && sprite[1] >= 0) {
+  if (sprite[0] >= 0 && sprite[1] >= 0 && sprite[0] < (16 - String(time).length())) {    //continue
     lcd.setCursor(sprite[0], sprite[1]);
 
     if (plays) {
@@ -146,15 +150,6 @@ void drawSprite(int sprite[], bool plays) {
     }
     else {
       lcd.write(2);
-
-      //
-      //      distance++;
-      //      if (distance%2)
-      //        score++;
-      //      byte digits = (score > 9999) ? 5 : (score > 999) ? 4 : (score > 99) ? 3 : (score > 9) ? 2 : 1;
-      //      lcd.setCursor(16 - digits, 0);
-      //      lcd.print(score);
-
 
 
     }
@@ -187,3 +182,4 @@ void reset() {
     frameCount = 0;
   }
 }
+
