@@ -1,9 +1,9 @@
+
 #include <LiquidCrystal.h>
 
-//variables for game mechanics
-int player[] = {
-  0, 0
-};
+
+//----------------------------------------------------------
+int player[] = {0, 0};
 int enemies[20][2];
 int coins[20][2];
 int enemyMoveWait = 600;
@@ -46,69 +46,80 @@ byte customChar3[8] {
 };
 
 
-//-----------variables for LCD screen and buttons-----------
-LiquidCrystal lcd(A0, A1, A2, A3, A4, A5);
+//----------------------------------------------------------
+LiquidCrystal lcd(A0, A1, A2, A3, A4, A5);    //Variables for LCD Screen and Buttons
 const int dButton = 12;
 const int uButton = 11;
-//----------------------
-void setup() {
+
+
+//----------------------------------------------------------
+void setup() {    //Setup Function For Turning On And Initializing Buttons / LCD Screen
   Serial.begin(9600);
-  //initialize enemies
+  //initialize enemies positions
   for (int i = 0; i < 20; i++) {
     enemies[i][0] = -1;
     enemies[i][1] = -1;
   }
   //start timing
   currentMoveWait = millis();
-  //-----------Initialize buttons/LCD-----------
-  lcd.begin(16, 2);
-  lcd.clear();
+  
+  //-------------------------------------------------------
+  lcd.begin(16, 2);    //Initialize Buttons/LCD
+  lcd.clear();    
   pinMode(uButton, INPUT);
   pinMode(dButton, INPUT);
   //----------------------
 }
 
-void loop() {
+
+//----------------------------------------------------------
+void loop() {    //Loop For The Main Movement And Detection Of Collision
   
-  if (digitalRead(dButton) == LOW) {
+  //button input for moving down
+  if (digitalRead(dButton) == LOW) {    
     if (player[1] < 1) {
       player[1]++;
     }
     reset();
   }
+  //button input for moving up
   if (digitalRead(uButton) == LOW) {
     if (player[1] > 0) {
       player[1]--;
     }
     reset();
   }
-  if (alive==1) {
+  if (alive==1) { 
+    //normal play, untill death   
     if (millis() - currentMoveWait > enemyMoveWait) {
       update();
       currentMoveWait = millis();
       Serial.print(currentMoveWait);
       Serial.print("\n");
     }
-  } else if(alive==0){
+  }else if (alive==0) {
+    //sets the menu for the first play    
     makeMenu();
   }else {
+    //death, resulting in a death screen, and finally resetting    
     lcd.clear();
     lcd.setCursor(0, 0);
     lcd.print("Your Score: ");
     lcd.setCursor(16-String(timeV).length(), 0);
     lcd.print(timeV/5*5);
-    if (digitalRead(dButton) == LOW) {
+    if (digitalRead(dButton) == LOW) 
       reset();
-    }
-    if (digitalRead(uButton) == LOW) {
+    if (digitalRead(uButton) == LOW) 
       reset();
-    }
   } 
 }
 
-void update() {
-  lcd.clear();
-  //Draw
+
+//----------------------------------------------------------
+void update() {    //Moving Both Character And Enemies Each Time Its Called
+  lcd.clear();     
+  
+  //draws the player and emeny sprite
   drawSprite(player, true);
   for (int i = 0; i < 20; i++) {
     drawSprite(enemies[i], false);
@@ -118,10 +129,10 @@ void update() {
   lcd.setCursor(16-String(timeV).length(),0);
   lcd.print(timeV/5*5);
 
-  //Move
+  //increments the sprites
   int curWait = 0;
   for (int i = 0; i < 20; i++) {
-    //if it's time to move then move the enemy backwards or put it in null position if out of bounds
+    //if it's time, move the enemy forewards or put it in null position
     if (enemies[i][0] >= 0) {
       enemies[i][0]--;
     }
@@ -141,15 +152,15 @@ void update() {
 }
 
 
-void drawSprite(int sprite[], bool plays) {
-  //-----------draw characters here-----------
-  //plays means it's the player and sprite contains an x and y that are the players location
-  //there is a possibility that the x or y will be negative
+//----------------------------------------------------------
+void drawSprite(int sprite[], bool plays) {    //Draw, Anamates The Player Bytes And Prints The Sprites
 
+  //plays means it's the player and sprite contains an x and y that are the players location
+  
   lcd.createChar(1, customChar1);
   lcd.createChar(2, customChar2);
 
-  if (sprite[0] >= 0 && sprite[1] >= 0 && sprite[0] < (16 - String(timeV).length())) {    //continue
+  if (sprite[0] >= 0 && sprite[1] >= 0 && sprite[0] < (16 - String(timeV).length())) { 
     lcd.setCursor(sprite[0], sprite[1]);
 
     if (plays) {
@@ -157,14 +168,14 @@ void drawSprite(int sprite[], bool plays) {
     }
     else {
       lcd.write(2);
-
-
     }
   }
 }
 
-void addEnemy() {
-  //finds null enemy and uses that space for a new enemy
+
+//----------------------------------------------------------
+void addEnemy() {    //Spans In The Astroid Sprites In Empty Boxes
+
   for (int i = 0; i < 20; i++) {
     if (enemies[i][0] == -1 && enemies[i][1] == -1) {
       enemies[i][0] = 16;
@@ -174,7 +185,10 @@ void addEnemy() {
   }
 }
 
-void makeMenu() {
+
+//----------------------------------------------------------
+void makeMenu() {    //Makes The Initial Menu And starts The Action!
+
   lcd.clear();
   lcd.setCursor(0,0);
   lcd.print("Welcome To . . .");
@@ -192,11 +206,11 @@ void makeMenu() {
   }
 }
 
-void reset() {
-  //if dead then we reset all values and restart the game
-  timeV = 0;
+
+//---------------------------------------------------------- 
+void reset() {    //Reset Causes The Game To Reset The Distance, And Enemies 
+  
   if (alive==2) {
-    timeV = 0;
     alive = 1;
     player[0] = 0;
     player[1] = 0;
@@ -209,3 +223,5 @@ void reset() {
     frameCount = 0;
   }
 }
+
+
