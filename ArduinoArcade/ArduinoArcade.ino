@@ -9,8 +9,8 @@ int coins[20][2];
 int enemyMoveWait = 600;
 long int currentMoveWait = 0;
 int frameCount = 0;
-int state = 0;
-int timev = 0;
+boolean alive = true;
+int timeV = 0;
 
 byte customChar1[8] {
   B10000,
@@ -69,8 +69,7 @@ void setup() {
 }
 
 void loop() {
-
-
+  
   if (digitalRead(dButton) == LOW) {
     if (player[1] < 1) {
       player[1]++;
@@ -83,28 +82,21 @@ void loop() {
     }
     reset();
   }
-  if (state==1) {
+  if (alive) {
     if (millis() - currentMoveWait > enemyMoveWait) {
       update();
       currentMoveWait = millis();
       Serial.print(currentMoveWait);
       Serial.print("\n");
     }
-  } else if (state == 0){
-    makeMenu();
   }
   else {
     lcd.clear();
     lcd.setCursor(0, 0);
-    lcd.print("YOU DEAD. PRESS");
-    lcd.setCursor(0, 1);
-    lcd.print("BUTTON FOR LIVE");
-  }
-  delay(10);
-}
-
-void makeMenu(){
-  //TODO: add menu code
+    lcd.print("Your Score: ")
+    lcd.setCursor(16-String(timeV).length(), 0);
+    lcd.print(timeV/5*5);
+    
 }
 
 void update() {
@@ -115,9 +107,9 @@ void update() {
     drawSprite(enemies[i], false);
   }
 
-  timev = (millis() / 2500);
-  lcd.setCursor(16-String(timev).length(),0);
-  lcd.print(timev/5*5);
+  time = (millis() / 2500);
+  lcd.setCursor(16-String(timeV).length(),0);
+  lcd.print(timeV/5*5);
 
   //Move
   int curWait = 0;
@@ -130,12 +122,8 @@ void update() {
       enemies[i][0] = -1;
       enemies[i][1] = -1;
     }
-
-    //Collisions
-    if(enemies[i][0] == player[0] && enemies[i][1]==player[1]){
-      state = 2;
-    }
   }
+  enemyMoveWait-=2;
   //check if it's time to spawn a new enemy
   if (frameCount%4==0) {
     addEnemy();
@@ -152,7 +140,7 @@ void drawSprite(int sprite[], bool plays) {
   lcd.createChar(1, customChar1);
   lcd.createChar(2, customChar2);
 
-  if (sprite[0] >= 0 && sprite[1] >= 0 && sprite[0] < (16 - String(timev).length())) {    //continue
+  if (sprite[0] >= 0 && sprite[1] >= 0 && sprite[0] < (16 - String(timeV).length())) {    //continue
     lcd.setCursor(sprite[0], sprite[1]);
 
     if (plays) {
@@ -179,8 +167,8 @@ void addEnemy() {
 
 void reset() {
   //if dead then we reset all values and restart the game
-  if (state==2) {
-    state = 1;
+  if (!alive) {
+    alive = true;
     player[0] = 0;
     player[1] = 0;
     //score = 0;
@@ -190,6 +178,6 @@ void reset() {
     }
     currentMoveWait = millis();
     frameCount = 0;
-    timev = 0;
   }
 }
+
