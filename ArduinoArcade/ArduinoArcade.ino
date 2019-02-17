@@ -11,6 +11,7 @@ long int currentMoveWait = 0;
 int frameCount = 0;
 int alive = 0;
 int score = 0;
+int plays = 0;
 
 byte customChar1[8] {
   B10000,
@@ -24,14 +25,14 @@ byte customChar1[8] {
 };
 
 byte customChar2[8] {
+  B00000,
   B01110,
   B01110,
   B01110,
   B01110,
   B01110,
   B01110,
-  B01110,
-  B01110,
+  B00000,
 };
 
 byte customChar3[8] {
@@ -59,6 +60,8 @@ void setup() {    //Setup Function For Turning On And Initializing Buttons / LCD
   for (int i = 0; i < 20; i++) {
     enemies[i][0] = -1;
     enemies[i][1] = -1;
+    coins[i][0] = -1;
+    coins[i][1] = -1;
   }
   //start timing
   currentMoveWait = millis();
@@ -106,7 +109,7 @@ void loop() {    //Loop For The Main Movement And Detection Of Collision
     lcd.setCursor(0, 0);
     lcd.print("Your Score: ");
     lcd.setCursor(16-String(score).length(), 0);
-    lcd.print(score);
+    lcd.print(score/5*5);
     if (digitalRead(dButton) == LOW) {
       score = 0;
       reset();
@@ -124,29 +127,48 @@ void update() {    //Moving Both Character And Enemies Each Time Its Called
   lcd.clear();     
   
   //draws the player and emeny sprite
-  drawSprite(player, true);
+  plays = 1;
+  drawSprite(player);
   for (int i = 0; i < 20; i++) {
-    drawSprite(enemies[i], false);
+    plays = 2;
+    drawSprite(enemies[i]);
+    if (i % 5) {
+      plays = 3;
+      drawSprite(coins[i]);
+    }
   }
 
   //increments the sprites
   int curWait = 0;
   for (int i = 0; i < 20; i++) {
-    //if it's time, move the enemy forewards or put it in null position
+    //if it's time, move the enemy left or put it in null position
     if (enemies[i][0] >= 0) {
       enemies[i][0]--;
-    }
-    else {
+    }else {
       enemies[i][0] = -1;
       enemies[i][1] = -1;
     }
-    if(enemies[i][0]==player[0] && enemies[i][1]==player[1]){
+    
+    if (coins[i][0] >= 0) {
+      coins[i][0]--;
+    }else {
+      coins[i][0] = -1;
+      coins[i][0] = -1;
+    }
+    if (enemies[i][0] == player[0] && enemies[i][1] == player[1]) {
       alive = 2;
+    }
+    if (coins[i][0] == player[0] && coins[i][1] == player[1]) {
+      score+=10;
     }
   }
   //check if it's time to spawn a new enemy
-  if (frameCount%4==0) {
+  if (frameCount%(int)random(3,4)==0) {
     addEnemy();
+  }
+  //check if it's time to spawn a new enemy
+  if (frameCount%(int)random(6,8) == 0) {
+    addCoin();
   }
   frameCount++;
   score++;
@@ -156,33 +178,48 @@ void update() {    //Moving Both Character And Enemies Each Time Its Called
 
 
 //----------------------------------------------------------
-void drawSprite(int sprite[], bool plays) {    //Draw, Anamates The Player Bytes And Prints The Sprites
+void drawSprite(int sprite[]) {    //Draw, Anamates The Player Bytes And Prints The Sprites
 
   //plays means it's the player and sprite contains an x and y that are the players location
   
   lcd.createChar(1, customChar1);
   lcd.createChar(2, customChar2);
+  lcd.createChar(3, customChar3);
 
   if (sprite[0] >= 0 && sprite[1] >= 0 && sprite[0] < (16 - String(score).length())) { 
     lcd.setCursor(sprite[0], sprite[1]);
 
-    if (plays) {
+    if (plays == 1) {
       lcd.write(1);
-    }
-    else {
+    }else if (plays == 2) {
       lcd.write(2);
+    }else {
+      lcd.write(3);
+    };
+  };
+}
+
+
+//----------------------------------------------------------
+void addEnemy() {    //Spawns In The Astroid Sprites In Empty Boxes
+
+  for (int i = 0; i < 20; i++) {
+    if (enemies[i][0] == -1 && enemies[i][1] == -1) {
+      enemies[i][0] = 16;
+      enemies[i][1] = (int)random(2);
+      return;
     }
   }
 }
 
 
 //----------------------------------------------------------
-void addEnemy() {    //Spans In The Astroid Sprites In Empty Boxes
-
+void addCoin() {    //Spawns In The Coins
+  
   for (int i = 0; i < 20; i++) {
-    if (enemies[i][0] == -1 && enemies[i][1] == -1) {
-      enemies[i][0] = 16;
-      enemies[i][1] = (int)random(2);
+    if (coins[i][0] == -1 && coins[i][1] == -1) {
+      coins[i][0] = 16;
+      coins[i][1] = (int)random(2);
       return;
     }
   }
@@ -219,6 +256,8 @@ void reset() {    //Reset Causes The Game To Reset The Distance, And Enemies
     for (int i = 0; i < 20; i++) {
       enemies[i][0] = -1;
       enemies[i][1] = -1;
+      coins[i][0] = -1;
+      coins[i][0] = -1;
     }
     currentMoveWait = millis();
     frameCount = 0;
