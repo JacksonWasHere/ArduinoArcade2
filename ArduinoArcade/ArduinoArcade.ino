@@ -6,11 +6,12 @@
 int player[] = {0, 0};
 int enemies[20][2];
 int coins[20][2];
-int enemyMoveWait = 600;
+int enemyMoveWait = 300;
 long int currentMoveWait = 0;
 int frameCount = 0;
 int alive = 0;
-int timeV = 0;
+unsigned long time1 = 0;
+unsigned long time2 = 0;
 
 byte customChar1[8] {
   B10000,
@@ -63,12 +64,12 @@ void setup() {    //Setup Function For Turning On And Initializing Buttons / LCD
   //start timing
   currentMoveWait = millis();
   
-  //-------------------------------------------------------
+  //-----------------------
   lcd.begin(16, 2);    //Initialize Buttons/LCD
   lcd.clear();    
   pinMode(uButton, INPUT);
   pinMode(dButton, INPUT);
-  //----------------------
+  //-----------------------
 }
 
 
@@ -105,8 +106,10 @@ void loop() {    //Loop For The Main Movement And Detection Of Collision
     lcd.clear();
     lcd.setCursor(0, 0);
     lcd.print("Your Score: ");
-    lcd.setCursor(16-String(timeV).length(), 0);
-    lcd.print(timeV/5*5);
+    lcd.setCursor(16-String(time1).length(), 0);
+    lcd.print(time1/5*5);
+    
+    
     if (digitalRead(dButton) == LOW) 
       reset();
     if (digitalRead(uButton) == LOW) 
@@ -124,11 +127,10 @@ void update() {    //Moving Both Character And Enemies Each Time Its Called
   for (int i = 0; i < 20; i++) {
     drawSprite(enemies[i], false);
   }
-
-  timeV = (millis() / 2500);
-  lcd.setCursor(16-String(timeV).length(),0);
-  lcd.print(timeV/5*5);
-
+  time1 = (millis() / 2500);
+  lcd.setCursor(16-String(time1).length(),0);
+  lcd.print(time1/5*5);
+  
   //increments the sprites
   int curWait = 0;
   for (int i = 0; i < 20; i++) {
@@ -160,7 +162,7 @@ void drawSprite(int sprite[], bool plays) {    //Draw, Anamates The Player Bytes
   lcd.createChar(1, customChar1);
   lcd.createChar(2, customChar2);
 
-  if (sprite[0] >= 0 && sprite[1] >= 0 && sprite[0] < (16 - String(timeV).length())) { 
+  if (sprite[0] >= 0 && sprite[1] >= 0 && sprite[0] < (16 - String(time1).length())) { 
     lcd.setCursor(sprite[0], sprite[1]);
 
     if (plays) {
@@ -209,7 +211,7 @@ void makeMenu() {    //Makes The Initial Menu And starts The Action!
 
 //---------------------------------------------------------- 
 void reset() {    //Reset Causes The Game To Reset The Distance, And Enemies 
-  
+
   if (alive==2) {
     alive = 1;
     player[0] = 0;
