@@ -6,12 +6,11 @@
 int player[] = {0, 0};
 int enemies[20][2];
 int coins[20][2];
-int enemyMoveWait = 300;
+int enemyMoveWait = 600;
 long int currentMoveWait = 0;
 int frameCount = 0;
 int alive = 0;
-unsigned long time1 = 0;
-unsigned long time2 = 0;
+int score = 0;
 
 byte customChar1[8] {
   B10000,
@@ -25,14 +24,14 @@ byte customChar1[8] {
 };
 
 byte customChar2[8] {
-  B00000,
   B01110,
-  B11111,
-  B11111,
-  B11111,
-  B11111,
   B01110,
-  B00000,
+  B01110,
+  B01110,
+  B01110,
+  B01110,
+  B01110,
+  B01110,
 };
 
 byte customChar3[8] {
@@ -64,12 +63,12 @@ void setup() {    //Setup Function For Turning On And Initializing Buttons / LCD
   //start timing
   currentMoveWait = millis();
   
-  //-----------------------
+  //-------------------------------------------------------
   lcd.begin(16, 2);    //Initialize Buttons/LCD
   lcd.clear();    
   pinMode(uButton, INPUT);
   pinMode(dButton, INPUT);
-  //-----------------------
+  //----------------------
 }
 
 
@@ -106,14 +105,16 @@ void loop() {    //Loop For The Main Movement And Detection Of Collision
     lcd.clear();
     lcd.setCursor(0, 0);
     lcd.print("Your Score: ");
-    lcd.setCursor(16-String(time1).length(), 0);
-    lcd.print(time1/5*5);
-    
-    
-    if (digitalRead(dButton) == LOW) 
+    lcd.setCursor(16-String(score).length(), 0);
+    lcd.print(score);
+    if (digitalRead(dButton) == LOW) {
+      score = 0;
       reset();
-    if (digitalRead(uButton) == LOW) 
+    }
+    if (digitalRead(uButton) == LOW) {
+      score = 0;
       reset();
+    }
   } 
 }
 
@@ -127,10 +128,7 @@ void update() {    //Moving Both Character And Enemies Each Time Its Called
   for (int i = 0; i < 20; i++) {
     drawSprite(enemies[i], false);
   }
-  time1 = (millis() / 2500);
-  lcd.setCursor(16-String(time1).length(),0);
-  lcd.print(time1/5*5);
-  
+
   //increments the sprites
   int curWait = 0;
   for (int i = 0; i < 20; i++) {
@@ -151,6 +149,9 @@ void update() {    //Moving Both Character And Enemies Each Time Its Called
     addEnemy();
   }
   frameCount++;
+  score++;
+  lcd.setCursor(16-String(score).length(),0);
+  lcd.print(score/5*5);
 }
 
 
@@ -162,7 +163,7 @@ void drawSprite(int sprite[], bool plays) {    //Draw, Anamates The Player Bytes
   lcd.createChar(1, customChar1);
   lcd.createChar(2, customChar2);
 
-  if (sprite[0] >= 0 && sprite[1] >= 0 && sprite[0] < (16 - String(time1).length())) { 
+  if (sprite[0] >= 0 && sprite[1] >= 0 && sprite[0] < (16 - String(score).length())) { 
     lcd.setCursor(sprite[0], sprite[1]);
 
     if (plays) {
@@ -210,13 +211,11 @@ void makeMenu() {    //Makes The Initial Menu And starts The Action!
 
 
 //---------------------------------------------------------- 
-void reset() {    //Reset Causes The Game To Reset The Distance, And Enemies 
-
+void reset() {    //Reset Causes The Game To Reset The Distance, And Enemies
   if (alive==2) {
     alive = 1;
     player[0] = 0;
     player[1] = 0;
-    //score = 0;
     for (int i = 0; i < 20; i++) {
       enemies[i][0] = -1;
       enemies[i][1] = -1;
@@ -225,5 +224,4 @@ void reset() {    //Reset Causes The Game To Reset The Distance, And Enemies
     frameCount = 0;
   }
 }
-
 
