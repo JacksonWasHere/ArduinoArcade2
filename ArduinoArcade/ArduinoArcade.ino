@@ -55,6 +55,7 @@ const int uButton = 11;
 
 //----------------------------------------------------------
 void setup() {    //Setup Function For Turning On And Initializing Buttons / LCD Screen
+
   Serial.begin(9600);
   //initialize enemies positions
   for (int i = 0; i < 20; i++) {
@@ -63,21 +64,21 @@ void setup() {    //Setup Function For Turning On And Initializing Buttons / LCD
     coins[i][0] = -1;
     coins[i][1] = -1;
   }
+  
   //start timing
   currentMoveWait = millis();
   
-  //-------------------------------------------------------
-  lcd.begin(16, 2);    //Initialize Buttons/LCD
+  //Initialize Buttons/LCD
+  lcd.begin(16, 2);
   lcd.clear();    
   pinMode(uButton, INPUT);
   pinMode(dButton, INPUT);
-  //----------------------
 }
 
 
 //----------------------------------------------------------
 void loop() {    //Loop For The Main Movement And Detection Of Collision
-  
+
   //button input for moving down
   if (digitalRead(dButton) == LOW) {    
     if (player[1] < 1) {
@@ -85,6 +86,7 @@ void loop() {    //Loop For The Main Movement And Detection Of Collision
     }
     reset();
   }
+  
   //button input for moving up
   if (digitalRead(uButton) == LOW) {
     if (player[1] > 0) {
@@ -92,6 +94,7 @@ void loop() {    //Loop For The Main Movement And Detection Of Collision
     }
     reset();
   }
+  
   if (alive==1) { 
     //normal play, untill death   
     if (millis() - currentMoveWait > enemyMoveWait) {
@@ -100,9 +103,11 @@ void loop() {    //Loop For The Main Movement And Detection Of Collision
       Serial.print(currentMoveWait);
       Serial.print("\n");
     }
+    
   }else if (alive==0) {
     //sets the menu for the first play    
     makeMenu();
+    
   }else {
     //death, resulting in a death screen, and finally resetting    
     lcd.clear();
@@ -114,6 +119,7 @@ void loop() {    //Loop For The Main Movement And Detection Of Collision
       score = 0;
       reset();
     }
+    
     if (digitalRead(uButton) == LOW) {
       score = 0;
       reset();
@@ -141,9 +147,11 @@ void update() {    //Moving Both Character And Enemies Each Time Its Called
   //increments the sprites
   int curWait = 0;
   for (int i = 0; i < 20; i++) {
+    
     //if it's time, move the enemy left or put it in null position
     if (enemies[i][0] >= 0) {
       enemies[i][0]--;
+      
     }else {
       enemies[i][0] = -1;
       enemies[i][1] = -1;
@@ -151,44 +159,49 @@ void update() {    //Moving Both Character And Enemies Each Time Its Called
     
     if (coins[i][0] >= 0) {
       coins[i][0]--;
+      
     }else {
       coins[i][0] = -1;
       coins[i][0] = -1;
     }
+    
     if (enemies[i][0] == player[0] && enemies[i][1] == player[1]) {
       alive = 2;
     }
-    if (coins[i][0] == player[0] && coins[i][1] == player[1]) {
+    
+    if (coins[i][0] == player[0] && coins[i][1] == player[1] && coins[i][0] != enemies[i][0] && coins[i][1] != enemies[i][1]) {
       score+=10;
     }
   }
+  
   //check if it's time to spawn a new enemy
   if (frameCount%(int)random(3,4)==0) {
     addEnemy();
   }
+  
   //check if it's time to spawn a new enemy
   if (frameCount%(int)random(6,8) == 0) {
     addCoin();
   }
+  
   frameCount++;
+  //increments score, and prints if a multiple of 5
   score++;
   lcd.setCursor(16-String(score).length(),0);
   lcd.print(score/5*5);
+  
 }
 
 
 //----------------------------------------------------------
 void drawSprite(int sprite[]) {    //Draw, Anamates The Player Bytes And Prints The Sprites
 
-  //plays means it's the player and sprite contains an x and y that are the players location
-  
   lcd.createChar(1, customChar1);
   lcd.createChar(2, customChar2);
   lcd.createChar(3, customChar3);
 
   if (sprite[0] >= 0 && sprite[1] >= 0 && sprite[0] < (16 - String(score).length())) { 
     lcd.setCursor(sprite[0], sprite[1]);
-
     if (plays == 1) {
       lcd.write(1);
     }else if (plays == 2) {
